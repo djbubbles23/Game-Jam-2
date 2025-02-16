@@ -8,24 +8,42 @@ public class DoorController : MonoBehaviour
     public float rotationSpeed = 2f; // Speed of rotation
 
     private Quaternion targetRotation;
+    private bool hasPlayed = false; 
+
+    // SFX
+    public AudioSource audioSource;
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         targetRotation = Quaternion.Euler(0, closedAngle, 0);
     }
 
     void Update()
     {
-        // Determine the target rotation based on isOpen
+        
         targetRotation = Quaternion.Euler(0, isOpen ? openAngle : closedAngle, 0);
 
-        // Smoothly rotate the door
+        
         transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+
+        
+        if (isOpen && !hasPlayed)
+        {
+            audioSource.Play();
+            hasPlayed = true; 
+        }
+        else if (!isOpen)
+        {
+            hasPlayed = false; 
+        }
     }
 
-    // Call this function to toggle the door state
+    
     public void ToggleDoor()
     {
         isOpen = !isOpen;
+        hasPlayed = false; 
     }
 }
