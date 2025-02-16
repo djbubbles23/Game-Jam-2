@@ -8,7 +8,7 @@ public class ItemMoveScript : MonoBehaviour
     public Transform objPos; //Position of the object
     private Transform moveTo; //Location to move to
     private Vector3 moveDistPos; //Distance to travel (position) to reach moveTo
-    private Quaternion moveDistRot; //Distance to travel (rotation) to reach moveTo
+    //private Quaternion moveDistRot; //Distance to travel (rotation) to reach moveTo
     //[SerializeField] float moveSpeed = 2f; //Speed that the object moves from location to location
 
     void Start()
@@ -31,10 +31,12 @@ public class ItemMoveScript : MonoBehaviour
     public void MoveObj(Transform endPos) {
         moveTo = endPos;
         moveDistPos = endPos.position - objPos.position;
+        objPos.rotation = endPos.rotation;
     }
 
     public void PutDown() {
         moveTo.position = initialPos;
         moveDistPos = moveTo.position - objPos.position;
+        objPos.rotation = initialRot;
     }
 }
