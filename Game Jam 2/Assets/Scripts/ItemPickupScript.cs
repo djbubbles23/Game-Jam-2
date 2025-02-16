@@ -36,7 +36,7 @@ public class ItemPickupScript : MonoBehaviour
                 lookObj = newObj;
                 lookObj.GetComponent<Outline>().OutlineWidth = 5;
 
-                if (click != 0) {
+                if (click != 0 && !pickedUp) {
                     Debug.Log("Pickup!!");
                     pickupPosStart = PickupLoc.position;
                     pickupRotStart = PickupLoc.rotation;

@@ -266,7 +266,7 @@ public class ST_PuzzleDisplay : MonoBehaviour
 		TileDisplayArray = new GameObject[Width,Height];
 
 		// set the scale and position values for this puzzle.
-		Scale = new Vector3(1.0f/Width, 1.0f, 1.0f/Height);
+		Scale = new Vector3(1.0f/Width*PuzzleScale.x, 1.0f*PuzzleScale.y, 1.0f/Height*PuzzleScale.z);
 		Tile.transform.localScale = Scale;
 
 		// used to count the number of tiles and assign each tile a correct value.
@@ -301,7 +301,6 @@ public class ST_PuzzleDisplay : MonoBehaviour
 
 				// apply the puzzle image to it.
 				thisTileMaterial.mainTexture = PuzzleImage;
-				Debug.Log("Texture Applied");
 					
 				// set the offset and tile values for this material.
 				thisTileMaterial.mainTextureOffset = new Vector2(1.0f/Width * i, 1.0f/Height * j);
