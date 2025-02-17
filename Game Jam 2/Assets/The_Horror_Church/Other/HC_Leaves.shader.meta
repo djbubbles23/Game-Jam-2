@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b9e2206000f063e4482138f005c8e6e1
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301806
+  packageName: The Horror Church
+  packageVersion: 1.0
+  assetPath: Assets/The_Horror_Church/Other/HC_Leaves.shader
+  uploadId: 706523

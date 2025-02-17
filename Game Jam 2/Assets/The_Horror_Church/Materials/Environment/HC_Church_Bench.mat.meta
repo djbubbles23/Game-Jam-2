@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6ad3dc3b15dfa5d44acae5d27ffb37df
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301806
+  packageName: The Horror Church
+  packageVersion: 1.0
+  assetPath: Assets/The_Horror_Church/Materials/Environment/HC_Church_Bench.mat
+  uploadId: 706523

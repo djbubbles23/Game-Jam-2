@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: bbb529d359c6ee24c81caecb4144ad74
+timeCreated: 1498413372
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301806
+  packageName: The Horror Church
+  packageVersion: 1.0
+  assetPath: Assets/The_Horror_Church/VFX/Source/HC_Dust.mat
+  uploadId: 706523

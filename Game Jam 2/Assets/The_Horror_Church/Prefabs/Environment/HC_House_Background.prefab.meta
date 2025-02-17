@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 61b4082e6f8a27b409329b1516612c2e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301806
+  packageName: The Horror Church
+  packageVersion: 1.0
+  assetPath: Assets/The_Horror_Church/Prefabs/Environment/HC_House_Background.prefab
+  uploadId: 706523

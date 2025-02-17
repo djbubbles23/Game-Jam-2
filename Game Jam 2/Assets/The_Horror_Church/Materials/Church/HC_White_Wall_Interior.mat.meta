@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 99b07bbd7e1b0f04fbd7ec1ab312497e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301806
+  packageName: The Horror Church
+  packageVersion: 1.0
+  assetPath: Assets/The_Horror_Church/Materials/Church/HC_White_Wall_Interior.mat
+  uploadId: 706523

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 09c7945b81c47104ba5823191b19471e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8574412962073106934
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301806
+  packageName: The Horror Church
+  packageVersion: 1.0
+  assetPath: Assets/The_Horror_Church/Other/HC_Rocks_Ground_01.terrainlayer
+  uploadId: 706523

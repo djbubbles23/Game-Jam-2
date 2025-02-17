@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 81a1025c2f750ce4a89fe65aff904b33
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301806
+  packageName: The Horror Church
+  packageVersion: 1.0
+  assetPath: Assets/The_Horror_Church/Materials/Environment/HC_Tabernacle.mat
+  uploadId: 706523
