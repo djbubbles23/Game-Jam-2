@@ -170,7 +170,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1980,7 +1980,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.44444445
+      value: 0.022222223
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -2043,9 +2043,10 @@ MonoBehaviour:
   eerieAudioSource: {fileID: 1243606996}
   eerieLoopClip: {fileID: 8300000, guid: 09ab7ef5556cd41dcb1a490287e148dc, type: 3}
   playerTransform: {fileID: 513017336}
-  maxVolume: 0.3
-  fadeSpeed: 0.8
-  triggerDistance: 2
+  maxVolume: 0.2
+  fadeSpeed: 0.5
+  triggerDistance: 3
+  floorThreshold: 1.5
 --- !u!82 &1243606996
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2068,7 +2069,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 10
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -2276,7 +2277,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 80261f70e73ab480bb9e71756cf55c8e, type: 3}
   - {fileID: 8300000, guid: 22af5a5639daf4405be9e54442267772, type: 3}
   - {fileID: 8300000, guid: 3263005030f7b4d02a40377b307f5762, type: 3}
-  footstepInterval: 0.5
+  footstepInterval: 0.4
+  crouchedIntervalMultiplier: 2
+  crouchedVolumeMultiplier: 0.5
   footstepAudioSource: {fileID: 1468983448}
 --- !u!82 &1468983448
 AudioSource:
@@ -2291,7 +2294,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.3
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2388,7 +2391,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: b223d11afedcf441b8b37ec1f5eaf4d8, type: 3}
   m_Resource: {fileID: 8300000, guid: b223d11afedcf441b8b37ec1f5eaf4d8, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.05
+  m_Volume: 0.3
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -2487,7 +2490,8 @@ MonoBehaviour:
   dollTransform: {fileID: 1243606992}
   maxPitch: 2.5
   minPitch: 1
-  maxDistance: 8
+  maxDistance: 10
+  floorThreshold: 1.5
   heartbeatAudioSource: {fileID: 1468983455}
 --- !u!64 &1547259699
 MeshCollider:
@@ -2623,6 +2627,22 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1060478477037862127, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
+      propertyPath: bobSpeed
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 1060478477037862127, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
+      propertyPath: walkSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1060478477037862127, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
+      propertyPath: enableJump
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1060478477037862127, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
+      propertyPath: enableSprint
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3285826368453923203, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
       propertyPath: m_RenderPostProcessing
       value: 1
@@ -2695,7 +2715,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
