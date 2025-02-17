@@ -34,6 +34,7 @@ public class DragNDrapPieceScript : MonoBehaviour
             }
         }
         else if (letGo && letGoTime > 20) {
+            //Debug.Log("Buffer Out");
             gameObject.transform.position = initialPos;
             gameObject.transform.rotation = initialRot;
             letGo = false;
@@ -49,6 +50,7 @@ public class DragNDrapPieceScript : MonoBehaviour
         initialPos = gameObject.transform.position;
         initialRot = gameObject.transform.rotation;
         dragging = true;
+        letGoTime = 0;
     }
 
     void OnMouseUp()

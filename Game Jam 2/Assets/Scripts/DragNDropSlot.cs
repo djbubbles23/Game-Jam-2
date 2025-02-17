@@ -7,9 +7,10 @@ public class DragNDropSlot : MonoBehaviour
 
     void Update()
     {
-        if (Vector3.Distance(piece.transform.position,gameObject.transform.position) < .05 
+        //Debug.Log(Vector3.Distance(piece.transform.position,gameObject.transform.position) );
+        if (Vector3.Distance(piece.transform.position,gameObject.transform.position) <= .1 
                 && piece.GetComponent<DragNDrapPieceScript>().letGo) {
-            Debug.Log("Yay");
+            // Debug.Log("Yay");
             piece.SetActive(false);
             manager.GetComponent<DragNDropManager>().solvedCount++;
         }
