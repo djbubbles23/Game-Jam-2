@@ -23,8 +23,9 @@ public class ItemPickupScript : MonoBehaviour
     {
         click = Input.GetAxis("Fire1");
         escape = Input.GetKey("escape") || Input.GetKey("tab");
+        
         RaycastHit hit;
-        if (Physics.Raycast (lookDir.position,lookDir.TransformDirection(Vector3.forward), out hit, 5)) {
+        if (Physics.Raycast(lookDir.position,lookDir.TransformDirection(Vector3.forward), out hit, 5,3)) {
             newObj = hit.transform.gameObject;
             //Resets Outline of object we are no longer looking at
             if (lookObj != null && lookObj != newObj && lookObj.tag == "Pickupable") {
@@ -47,19 +48,19 @@ public class ItemPickupScript : MonoBehaviour
                     gameObject.GetComponent<FirstPersonController>().enabled = false;
                     Cursor.lockState = CursorLockMode.None;
                 }
-                if (escape && pickedUp) {
-                    Debug.Log("Put Down");
-                    pickedUp = false;
-
-                    lookObj.GetComponent<ItemMoveScript>().PutDown();
-
-                    gameObject.GetComponent<FirstPersonController>().enabled = true;
-                    Cursor.lockState = CursorLockMode.Locked;
-
-                    PickupLoc.position = pickupPosStart;
-                    PickupLoc.rotation = pickupRotStart;
-                }
             }
+        }
+        if (escape && pickedUp) {
+            Debug.Log("Put Down");
+            pickedUp = false;
+
+            lookObj.GetComponent<ItemMoveScript>().PutDown();
+
+            gameObject.GetComponent<FirstPersonController>().enabled = true;
+            Cursor.lockState = CursorLockMode.Locked;
+
+            PickupLoc.position = pickupPosStart;
+            PickupLoc.rotation = pickupRotStart;
         }
     }
     void FixedUpdate()
