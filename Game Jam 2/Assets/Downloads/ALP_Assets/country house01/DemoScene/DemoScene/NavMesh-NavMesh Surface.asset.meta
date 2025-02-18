@@ -1,8 +1,15 @@
 fileFormatVersion: 2
+<<<<<<<< Updated upstream:Game Jam 2/Assets/Downloads/ALP_Assets/country house01/DemoScene/DemoScene/NavMesh-NavMesh Surface.asset.meta
 guid: 80af507114f404091b7254ed9613c839
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 0
+========
+guid: 79e00cb64bf3bca438768c9f83b1f6c0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+>>>>>>>> Stashed changes:Game Jam 2/Assets/Scenes/Main/GameObject Profile.asset.meta
   userData: 
   assetBundleName: 
   assetBundleVariant: 
