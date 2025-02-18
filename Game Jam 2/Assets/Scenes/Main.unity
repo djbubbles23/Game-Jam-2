@@ -1882,9 +1882,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1060478476185294451, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2080851872}
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
 >>>>>>> Stashed changes
   m_SourcePrefab: {fileID: 100100000, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
 --- !u!1 &2056604829
@@ -2200,13 +2197,8 @@ SceneRoots:
   - {fileID: 5480078796650359376}
   - {fileID: 5376905173778796982}
 <<<<<<< Updated upstream
-<<<<<<< Updated upstream
   - {fileID: 154946530}
   - {fileID: 322430309}
-=======
-  - {fileID: 765015993}
-  - {fileID: 1902927293}
->>>>>>> Stashed changes
 =======
   - {fileID: 765015993}
   - {fileID: 1902927293}
