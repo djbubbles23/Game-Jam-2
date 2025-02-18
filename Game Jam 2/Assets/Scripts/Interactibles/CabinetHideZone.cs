@@ -4,19 +4,17 @@ using UnityEngine;
 public class CabinetHideZone : MonoBehaviour
 {
     [Header("Hide Settings")]
-    [Tooltip("Where the player gets teleported to when hiding.")]
+    [Tooltip("Where the player gets teleported when hiding.")]
     public Transform hidePosition;
-
-    [Tooltip("Where the player gets teleported to when exiting the hide state.")]
+    [Tooltip("Where the player gets teleported when exiting hiding.")]
     public Transform exitPosition;
-
-    [Tooltip("Key to press for toggling hide/exit.")]
+    [Tooltip("Key to toggle hide/exit.")]
     public KeyCode hideKey = KeyCode.H;
 
     private bool playerInZone = false;
     private Transform playerTransform;
 
-    // Flag to track whether the player is currently hidden
+    // Track whether the player is currently hidden.
     private bool isHidden = false;
 
     void OnTriggerEnter(Collider other)
@@ -25,15 +23,11 @@ public class CabinetHideZone : MonoBehaviour
         {
             playerInZone = true;
             playerTransform = other.transform;
-            // Update UI prompt based on hidden state
+            // Show prompt based on current state.
             if (!isHidden)
-            {
                 HUDManager.Instance.ShowActionPrompt("Press H to hide");
-            }
             else
-            {
                 HUDManager.Instance.ShowActionPrompt("Press H to exit");
-            }
         }
     }
 
@@ -44,6 +38,16 @@ public class CabinetHideZone : MonoBehaviour
             playerInZone = false;
             playerTransform = null;
             HUDManager.Instance.HideActionPrompt();
+            // Optional: if the player exits while hidden, automatically unhide them.
+            if (isHidden)
+            {
+                if (exitPosition != null)
+                {
+                    other.transform.SetPositionAndRotation(exitPosition.position, exitPosition.rotation);
+                }
+                isHidden = false;
+                HUDManager.Instance.HideHideOverlay();
+            }
         }
     }
 
@@ -53,25 +57,29 @@ public class CabinetHideZone : MonoBehaviour
         {
             if (!isHidden)
             {
-                // Teleport player inside the cabinet and mark as hidden
+                // Teleport the player into the cabinet and mark as hidden.
                 if (hidePosition != null)
                 {
                     playerTransform.SetPositionAndRotation(hidePosition.position, hidePosition.rotation);
                 }
                 isHidden = true;
-                Debug.Log("Player has been teleported inside and is now hidden.");
+                Debug.Log("Player is now hidden.");
                 HUDManager.Instance.ShowActionPrompt("Press H to exit");
+                // Show a full-screen black overlay to hide the camera view.
+                HUDManager.Instance.ShowHideOverlay();
             }
             else
             {
-                // Teleport player to the exit position and mark as not hidden
+                // Teleport the player out and mark as not hidden.
                 if (exitPosition != null)
                 {
                     playerTransform.SetPositionAndRotation(exitPosition.position, exitPosition.rotation);
                 }
                 isHidden = false;
-                Debug.Log("Player has been teleported out and is no longer hidden.");
+                Debug.Log("Player is no longer hidden.");
                 HUDManager.Instance.ShowActionPrompt("Press H to hide");
+                // Remove the overlay.
+                HUDManager.Instance.HideHideOverlay();
             }
         }
     }

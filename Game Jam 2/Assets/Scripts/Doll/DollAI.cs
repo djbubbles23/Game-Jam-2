@@ -50,8 +50,17 @@ public class DollAI : MonoBehaviour
     private Vector3 investigateTarget;  // Target for investigate state
     private Vector3 lastKnownPlayerPos; // Last known player position
 
-    // Store the hearing sphere's original radius
+    // Store the hearing sphere's original radius (from the SphereCollider)
     private float hearingRadius;
+
+    [Header("Line of Sight (Visibility) Settings")]
+    [Tooltip("Sphere cast radius for visibility checks. Increase for more leniency.")]
+    public float visibilitySphereRadius = 0.3f;
+
+    // Timer to track how long the player has been out of sight while chasing.
+    [Tooltip("Time (in seconds) after which lost sight results in switching to Search.")]
+    public float lostSightDuration = 1.0f;
+    private float lostSightTimer = 0f;
 
     void Start()
     {
@@ -65,7 +74,7 @@ public class DollAI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No SphereCollider found for hearing detection. Using default 5f.");
+            Debug.LogWarning("DollAI: No SphereCollider found for hearing detection. Using default 5f.");
             hearingRadius = 5f;
         }
 
@@ -80,7 +89,7 @@ public class DollAI : MonoBehaviour
     {
         Debug.Log($"Current state: {currentState}");
 
-        // Global visual check if not chasing
+        // Global visual check if not already chasing
         if (currentState != DollState.Chase && playerTransform != null)
         {
             bool playerVisible = IsPlayerVisibleSphere();
@@ -91,11 +100,11 @@ public class DollAI : MonoBehaviour
                 lastKnownPlayerPos = playerTransform.position;
                 agent.SetDestination(lastKnownPlayerPos);
                 currentState = DollState.Chase;
+                lostSightTimer = 0f;
                 return;
             }
         }
 
-        // State machine
         switch (currentState)
         {
             case DollState.Patrol:
@@ -192,25 +201,33 @@ public class DollAI : MonoBehaviour
         bool visible = IsPlayerVisibleSphere();
         Debug.Log($"Chase: Distance = {distanceToPlayer}, Visible = {visible}");
 
-        if (distanceToPlayer < chaseDistance * 1.5f && visible)
+        if (visible && distanceToPlayer < chaseDistance * 1.5f)
         {
+            lostSightTimer = 0f; // Reset timer if player still in sight
             lastKnownPlayerPos = playerTransform.position;
             agent.SetDestination(lastKnownPlayerPos);
         }
         else
         {
-            Debug.Log("Lost sight or out of range. Switching to Search.");
-            agent.isStopped = false;
-            agent.SetDestination(lastKnownPlayerPos);
-            searchTimer = 0f;
-            currentState = DollState.Search;
+            lostSightTimer += Time.deltaTime;
+            Debug.Log($"Chase: Lost sight timer = {lostSightTimer}");
+            if (lostSightTimer >= lostSightDuration)
+            {
+                Debug.Log("Player lost for sufficient time. Switching to Search.");
+                agent.isStopped = false;
+                agent.SetDestination(lastKnownPlayerPos);
+                searchTimer = 0f;
+                currentState = DollState.Search;
+                lostSightTimer = 0f;
+                return;
+            }
         }
 
         if (distanceToPlayer < 1.5f)
         {
             Debug.Log("Player caught! Stopping agent.");
             agent.isStopped = true;
-            // Add "player caught" logic here
+            // Insert "player caught" logic here.
         }
     }
 
@@ -238,9 +255,9 @@ public class DollAI : MonoBehaviour
 
     #region Hearing via Trigger
 
-    // Called when any collider stays within the doll's SphereCollider (set as trigger)
     private void OnTriggerStay(Collider other)
     {
+        // If in Chase mode, ignore new sounds.
         if (currentState == DollState.Chase)
             return;
 
@@ -249,20 +266,19 @@ public class DollAI : MonoBehaviour
             if (cfg.audioSource == null)
                 continue;
 
-            // Check if the collider is part of the AudioSource's GameObject or its children
+            // Check if the collider is part of the AudioSource's GameObject or its children.
             if (other.gameObject == cfg.audioSource.gameObject || other.transform.IsChildOf(cfg.audioSource.transform))
             {
                 if (cfg.audioSource.isPlaying)
                 {
                     float currentVolume = cfg.audioSource.volume;
                     bool isFromPlayer = false;
-
                     if (playerTransform != null && cfg.audioSource.gameObject.transform.IsChildOf(playerTransform))
                         isFromPlayer = true;
 
                     float distance = Vector3.Distance(transform.position, cfg.audioSource.transform.position);
 
-                    // If sound is from player and player is crouched, use half the hearing radius
+                    // If sound is from the player and the player is crouched, use half the hearing radius.
                     if (isFromPlayer)
                     {
                         var playerController = playerTransform.GetComponent<FirstPersonController>();
@@ -278,11 +294,19 @@ public class DollAI : MonoBehaviour
 
                     if (currentVolume >= cfg.detectionThreshold)
                     {
+                        // Update investigate target to the most recent sound location.
                         investigateTarget = cfg.audioSource.transform.position;
                         agent.SetDestination(investigateTarget);
-                        currentState = DollState.Investigate;
-                        Debug.Log($"Heard '{cfg.audioSource.name}' from {other.name} (vol: {currentVolume}, threshold: {cfg.detectionThreshold}). Switching to Investigate.");
-                        return;
+                        if (currentState != DollState.Investigate)
+                        {
+                            currentState = DollState.Investigate;
+                            Debug.Log($"Switched to Investigate state. New investigate target: {investigateTarget}");
+                        }
+                        else
+                        {
+                            Debug.Log($"Updated investigate target to: {investigateTarget}");
+                        }
+                        // Do not return immediately so that if multiple sounds occur, the latest one updates the target.
                     }
                 }
             }
@@ -302,7 +326,7 @@ public class DollAI : MonoBehaviour
         Vector3 playerCenter = playerTransform.position + Vector3.up * 0.35f;
         Vector3 direction = playerCenter - dollEyes;
         float distance = direction.magnitude;
-        float sphereRadius = 0.3f;
+        float sphereRadius = visibilitySphereRadius;
 
         Debug.Log($"SphereCast from {dollEyes} to {playerCenter} (dist: {distance}, radius: {sphereRadius})");
         if (Physics.SphereCast(dollEyes, sphereRadius, direction.normalized, out RaycastHit hit, distance))

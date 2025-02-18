@@ -1,12 +1,14 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class HUDManager : MonoBehaviour
 {
     public static HUDManager Instance { get; private set; }
 
-    [Header("References")]
+    [Header("UI Elements")]
     [SerializeField] private TextMeshProUGUI actionPrompt;
+    [SerializeField] private Image hideOverlay; // Full-screen black Image
 
     private void Awake()
     {
@@ -27,5 +29,21 @@ public class HUDManager : MonoBehaviour
     public void HideActionPrompt()
     {
         actionPrompt.gameObject.SetActive(false);
+    }
+
+    public void ShowHideOverlay()
+    {
+        if (hideOverlay != null)
+        {
+            hideOverlay.gameObject.SetActive(true);
+        }
+    }
+
+    public void HideHideOverlay()
+    {
+        if (hideOverlay != null)
+        {
+            hideOverlay.gameObject.SetActive(false);
+        }
     }
 }
