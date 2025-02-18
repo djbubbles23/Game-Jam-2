@@ -302,7 +302,7 @@ public class DollAI : MonoBehaviour
         Vector3 playerCenter = playerTransform.position + Vector3.up * 0.35f;
         Vector3 direction = playerCenter - dollEyes;
         float distance = direction.magnitude;
-        float sphereRadius = 0.2f;
+        float sphereRadius = 0.3f;
 
         Debug.Log($"SphereCast from {dollEyes} to {playerCenter} (dist: {distance}, radius: {sphereRadius})");
         if (Physics.SphereCast(dollEyes, sphereRadius, direction.normalized, out RaycastHit hit, distance))

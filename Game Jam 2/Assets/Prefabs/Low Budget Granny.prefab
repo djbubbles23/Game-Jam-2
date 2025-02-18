@@ -146,4 +146,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4df32b9617cf34aeea99e5bae59f99e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
+  currentState: 0
+  patrolPoints: []
+  cyclePatrolPoints: 1
+  idleTimeAtPatrolPoint: 2
+  soundConfigs: []
+  chaseDistance: 5
+  searchDuration: 5
+  playerTransform: {fileID: 0}
