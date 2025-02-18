@@ -496,12 +496,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8254830528388925101, guid: 5d7cd23b45be742fa94ed1436c75496d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 654863188}
-    - targetCorrespondingSourceObject: {fileID: 8640205557460130045, guid: 5d7cd23b45be742fa94ed1436c75496d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 697615532}
     - targetCorrespondingSourceObject: {fileID: -1333051020862343127, guid: 5d7cd23b45be742fa94ed1436c75496d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 573111305}
+    - targetCorrespondingSourceObject: {fileID: 8640205557460130045, guid: 5d7cd23b45be742fa94ed1436c75496d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 697615532}
     - targetCorrespondingSourceObject: {fileID: -6544207043104339812, guid: 5d7cd23b45be742fa94ed1436c75496d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 700074478}
@@ -3085,6 +3085,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1060478476185294449, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
+      propertyPath: field of view
+      value: 49
+      objectReference: {fileID: 0}
+    - target: {fileID: 1060478476185294454, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.54
+      objectReference: {fileID: 0}
     - target: {fileID: 1060478477037862117, guid: 8c6695297953acf469f00cd15c1a3e87, type: 3}
       propertyPath: m_Name
       value: Player
