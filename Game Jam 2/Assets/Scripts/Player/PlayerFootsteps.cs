@@ -7,7 +7,7 @@ public class PlayerFootsteps : MonoBehaviour
     [SerializeField] private float footstepInterval = 0.5f;
     // Multipliers for crouched state:
     [SerializeField] private float crouchedIntervalMultiplier = 1.5f;
-    [SerializeField] private float crouchedVolumeMultiplier = 0.5f;
+    [SerializeField] private float crouchedFootstepsVolume = 0.5f;
 
     [SerializeField] private AudioSource footstepAudioSource;
     private float footstepTimer;
@@ -53,7 +53,7 @@ public class PlayerFootsteps : MonoBehaviour
     {
         if (footstepClips.Length == 0) return;
         AudioClip clip = footstepClips[Random.Range(0, footstepClips.Length)];
-        float volume = isCrouched ? crouchedVolumeMultiplier : 1.0f;
+        float volume = isCrouched ? crouchedFootstepsVolume : 1.0f;
         footstepAudioSource.PlayOneShot(clip, volume);
     }
 }
