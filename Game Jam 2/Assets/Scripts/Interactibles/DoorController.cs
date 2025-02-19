@@ -11,11 +11,11 @@ public class DoorController : MonoBehaviour
     private bool hasPlayed = false; 
 
     // SFX
-    public AudioSource audioSource;
+    //public AudioSource audioSource;
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
+        //audioSource = GetComponent<AudioSource>();
 
         targetRotation = Quaternion.Euler(0, closedAngle, 0);
     }
@@ -31,7 +31,7 @@ public class DoorController : MonoBehaviour
         
         if (isOpen && !hasPlayed)
         {
-            audioSource.Play();
+            //audioSource.Play();
             hasPlayed = true; 
         }
         else if (!isOpen)
