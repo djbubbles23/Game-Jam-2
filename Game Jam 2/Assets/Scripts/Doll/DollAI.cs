@@ -12,125 +12,92 @@ public enum DollState
 
 public class DollAI : MonoBehaviour
 {
-    [Header("AI State")]
+    [Header("AI States")]
     public DollState currentState = DollState.Patrol;
-    private DollState previousState = DollState.Patrol;
 
     [Header("Patrol Settings")]
-    [Tooltip("Points to visit in order or randomly.")]
     public List<Transform> patrolPoints = new List<Transform>();
-    [Tooltip("Cycle patrol points (true) or pick random (false).")]
     public bool cyclePatrolPoints = true;
-    [Tooltip("Seconds to idle at a patrol point.")]
     public float idleTimeAtPatrolPoint = 2f;
     private int currentPatrolIndex = 0;
     private float patrolIdleTimer = 0f;
     private bool isIdlingAtPoint = false;
 
     [Header("Sound Detection")]
-    [Tooltip("List of SoundConfigs with AudioSource and detection settings.")]
     public List<SoundConfig> soundConfigs = new List<SoundConfig>();
 
     [Header("Chase Settings")]
-    [Tooltip("Distance required to trigger a chase.")]
     public float chaseDistance = 5f;
 
     [Header("Search Settings")]
-    [Tooltip("Time to remain in Search state before returning to Patrol.")]
     public float searchDuration = 5f;
     private float searchTimer;
 
     [Header("Player Reference")]
-    [Tooltip("Drag the player's transform here.")]
     public Transform playerTransform;
 
+    // Components
     private NavMeshAgent agent;
-    private Vector3 investigateTarget;  // Target for Investigate state
-    private Vector3 lastKnownPlayerPos; // Last known player position
+    private SphereCollider hearingCollider;
 
-    // Hearing detection (from SphereCollider)
-    private float hearingRadius;
-
-    [Header("Line of Sight Settings")]
-    [Tooltip("Sphere cast radius for visibility checks. Increase for more leniency.")]
+    // AI internal variables
+    private Vector3 investigateTarget;
+    private Vector3 lastKnownPlayerPos;
+    private float hearingRadius = 5f;
     public float visibilitySphereRadius = 0.3f;
-
-    [Header("Chase Lost Settings")]
-    [Tooltip("Time (in seconds) after which lost sight results in switching to Search.")]
     public float lostSightDuration = 1.0f;
     private float lostSightTimer = 0f;
 
     [Header("Animation")]
-    [Tooltip("Reference to the doll's Animator component (assigned via Inspector).")]
     public Animator dollAnimator;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
 
-        // Get the SphereCollider's radius (for hearing detection)
-        SphereCollider hearingCollider = GetComponent<SphereCollider>();
+        hearingCollider = GetComponent<SphereCollider>();
         if (hearingCollider != null)
         {
             hearingRadius = hearingCollider.radius;
+            Debug.Log($"[Start] Hearing radius set to: {hearingRadius}");
         }
         else
         {
-            Debug.LogWarning("DollAI: No SphereCollider found for hearing detection. Using default 5f.");
-            hearingRadius = 5f;
+            Debug.LogWarning("[Start] No SphereCollider found; using default hearing radius.");
         }
 
-        if (dollAnimator == null)
-            Debug.LogWarning("DollAI: Animator not assigned in Inspector.");
-
+        // Set initial state and patrol point if available
         currentState = DollState.Patrol;
-        previousState = currentState;
-        Debug.Log($"DollAI started. State: {currentState}, Patrol Points: {patrolPoints.Count}");
-
+        Debug.Log("[Start] Initial state set to Patrol.");
         if (patrolPoints.Count > 0)
+        {
             SetNextPatrolPoint();
+            Debug.Log("[Start] First patrol point set.");
+        }
 
-        // Set initial animation trigger to Idle.
-        if (dollAnimator != null)
+        // Set idle animation at start
+        if (dollAnimator)
             dollAnimator.SetTrigger("Idle");
     }
 
     void Update()
     {
-        Debug.Log($"Current state: {currentState}");
-
-        // Global visual check if not already chasing.
+        // Quick check: if not chasing, see if player is visible and close enough
         if (currentState != DollState.Chase && playerTransform != null)
         {
-            bool playerVisible = IsPlayerVisibleSphere();
-            float distToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-            if (playerVisible && distToPlayer < chaseDistance)
+            bool visible = IsPlayerVisibleSphere();
+            float dist = Vector3.Distance(transform.position, playerTransform.position);
+            if (visible && dist < chaseDistance)
             {
-                Debug.Log("Player spotted visually. Switching to Chase.");
                 lastKnownPlayerPos = playerTransform.position;
                 agent.SetDestination(lastKnownPlayerPos);
                 currentState = DollState.Chase;
                 lostSightTimer = 0f;
+                Debug.Log($"[Update] Player spotted! Distance: {dist:F2}. Switching to Chase state.");
             }
         }
 
-        // Update animation if state changed.
-        if (dollAnimator != null && currentState != previousState)
-        {
-            switch (currentState)
-            {
-                case DollState.Patrol:
-                case DollState.Search:
-                    dollAnimator.SetTrigger("Walk");
-                    break;
-                case DollState.Investigate:
-                case DollState.Chase:
-                    dollAnimator.SetTrigger("Idle");
-                    break;
-            }
-            previousState = currentState;
-        }
-
+        // Run the state-specific behavior
         switch (currentState)
         {
             case DollState.Patrol:
@@ -146,38 +113,46 @@ public class DollAI : MonoBehaviour
                 HandleSearch();
                 break;
         }
+
+        // Update animations based on current movement
+        UpdateAnimations();
     }
 
     #region Patrol
-
     private void HandlePatrol()
     {
-        Debug.Log("Patrolling...");
-        if (patrolPoints.Count == 0) return;
+        if (patrolPoints.Count == 0)
+        {
+            Debug.LogWarning("[Patrol] No patrol points set.");
+            return;
+        }
 
         if (isIdlingAtPoint)
         {
             patrolIdleTimer += Time.deltaTime;
+            Debug.Log($"[Patrol] Idling... Timer: {patrolIdleTimer:F2}/{idleTimeAtPatrolPoint}");
             if (patrolIdleTimer >= idleTimeAtPatrolPoint)
             {
                 isIdlingAtPoint = false;
                 patrolIdleTimer = 0f;
                 SetNextPatrolPoint();
+                Debug.Log("[Patrol] Idle time over. Moving to next patrol point.");
             }
-            return;
         }
-
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.1f)
+        else
         {
-            Debug.Log("Reached patrol point. Idling.");
-            isIdlingAtPoint = true;
-            agent.SetDestination(transform.position);
+            // Check if we've reached our destination
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.1f)
+            {
+                isIdlingAtPoint = true;
+                agent.SetDestination(transform.position); // stop movement
+                Debug.Log("[Patrol] Reached patrol point. Starting idle.");
+            }
         }
     }
 
     private void SetNextPatrolPoint()
     {
-        Debug.Log("Selecting next patrol point...");
         if (cyclePatrolPoints)
         {
             currentPatrolIndex++;
@@ -188,186 +163,180 @@ public class DollAI : MonoBehaviour
         {
             currentPatrolIndex = Random.Range(0, patrolPoints.Count);
         }
+
         Vector3 patrolDestination = patrolPoints[currentPatrolIndex].position;
         agent.SetDestination(patrolDestination);
-        Debug.Log($"Moving to point {currentPatrolIndex} at {patrolDestination}");
+        Debug.Log($"[Patrol] Next patrol point set to index {currentPatrolIndex} at position {patrolDestination}");
     }
-
     #endregion
 
     #region Investigate
-
     private void HandleInvestigate()
     {
-        // Continuously update destination if new sounds occur.
+        // When investigation destination is reached, switch to search
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.1f)
         {
-            Debug.Log("Reached investigate location. Switching to Search.");
             searchTimer = 0f;
             currentState = DollState.Search;
+            Debug.Log("[Investigate] Reached investigation point. Switching to Search state.");
         }
     }
-
     #endregion
 
     #region Chase
-
     private void HandleChase()
     {
         if (playerTransform == null)
         {
-            Debug.Log("No player reference. Switching to Search.");
             searchTimer = 0f;
             currentState = DollState.Search;
+            Debug.LogWarning("[Chase] Player reference lost. Switching to Search state.");
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+        float distToPlayer = Vector3.Distance(transform.position, playerTransform.position);
         bool visible = IsPlayerVisibleSphere();
-        Debug.Log($"Chase: Distance = {distanceToPlayer}, Visible = {visible}");
 
-        if (visible && distanceToPlayer < chaseDistance * 1.5f)
+        // If player is still visible and within a reasonable distance, continue chasing
+        if (visible && distToPlayer < chaseDistance * 1.5f)
         {
-            lostSightTimer = 0f; // Reset if player is visible.
+            lostSightTimer = 0f;
             lastKnownPlayerPos = playerTransform.position;
             agent.SetDestination(lastKnownPlayerPos);
+            Debug.Log($"[Chase] Chasing player. Distance: {distToPlayer:F2}");
         }
         else
         {
+            // Player not visible: start timer before switching to search
             lostSightTimer += Time.deltaTime;
-            Debug.Log($"Chase: Lost sight timer = {lostSightTimer}");
+            Debug.Log($"[Chase] Lost sight of player. Timer: {lostSightTimer:F2}/{lostSightDuration}");
             if (lostSightTimer >= lostSightDuration)
             {
-                Debug.Log("Player lost for sufficient time. Switching to Search.");
                 agent.isStopped = false;
                 agent.SetDestination(lastKnownPlayerPos);
                 searchTimer = 0f;
                 currentState = DollState.Search;
                 lostSightTimer = 0f;
+                Debug.Log("[Chase] Player lost. Switching to Search state.");
                 return;
             }
         }
 
-        if (distanceToPlayer < 1.5f)
+        // If the doll is very close to the player, consider the player caught
+        if (distToPlayer < 2f)
         {
-            Debug.Log("Player caught! Stopping agent.");
             agent.isStopped = true;
-            // Insert "player caught" logic here.
+            Debug.Log("[Chase] Player caught! Stopping movement.");
+            // Insert additional "player caught" logic here if needed.
         }
     }
-
     #endregion
 
     #region Search
-
     private void HandleSearch()
     {
         searchTimer += Time.deltaTime;
-        Debug.Log($"Search timer: {searchTimer}");
+        Debug.Log($"[Search] Searching... Timer: {searchTimer:F2}/{searchDuration}");
         if (searchTimer >= searchDuration)
         {
-            Debug.Log("Search timed out. Returning to Patrol.");
             currentState = DollState.Patrol;
             agent.SetDestination(transform.position);
             isIdlingAtPoint = false;
             patrolIdleTimer = 0f;
             if (patrolPoints.Count > 0)
                 SetNextPatrolPoint();
+            Debug.Log("[Search] Search time over. Returning to Patrol state.");
         }
     }
-
     #endregion
 
-    #region Hearing via Trigger
-
+    #region Hearing - OnTriggerStay
     private void OnTriggerStay(Collider other)
     {
-        if (currentState == DollState.Chase)
-            return;
+        // Ignore sounds if chasing the player
+        if (currentState == DollState.Chase) return;
 
+        // Check each sound config for matching audio source
         foreach (SoundConfig cfg in soundConfigs)
         {
             if (cfg.audioSource == null)
                 continue;
 
+            // Check if the collider belongs to the audio source or its children
             if (other.gameObject == cfg.audioSource.gameObject || other.transform.IsChildOf(cfg.audioSource.transform))
             {
-                if (cfg.audioSource.isPlaying)
+                if (!cfg.audioSource.isPlaying)
+                    continue;
+
+                float vol = cfg.audioSource.volume;
+                bool isFromPlayer = (playerTransform != null && cfg.audioSource.transform.IsChildOf(playerTransform));
+                float dist = Vector3.Distance(transform.position, cfg.audioSource.transform.position);
+
+                // If the sound is from a crouched player, reduce hearing range
+                if (isFromPlayer)
                 {
-                    float currentVolume = cfg.audioSource.volume;
-                    bool isFromPlayer = false;
-                    if (playerTransform != null && cfg.audioSource.gameObject.transform.IsChildOf(playerTransform))
-                        isFromPlayer = true;
-
-                    float distance = Vector3.Distance(transform.position, cfg.audioSource.transform.position);
-
-                    if (isFromPlayer)
+                    var pc = playerTransform.GetComponent<FirstPersonController>();
+                    if (pc != null && pc.IsCrouched && dist > hearingRadius / 2f)
                     {
-                        var playerController = playerTransform.GetComponent<FirstPersonController>();
-                        if (playerController != null && playerController.IsCrouched)
-                        {
-                            if (distance > hearingRadius / 2f)
-                            {
-                                Debug.Log($"Ignoring sound '{cfg.audioSource.name}' (distance {distance} > half hearing radius {hearingRadius / 2f}) due to crouch.");
-                                continue;
-                            }
-                        }
+                        Debug.Log($"[Hearing] Sound from player ignored due to crouch. Distance: {dist:F2}");
+                        continue;
                     }
+                }
 
-                    if (currentVolume >= cfg.detectionThreshold)
+                // If the volume exceeds threshold, investigate the sound source
+                if (vol >= cfg.detectionThreshold)
+                {
+                    investigateTarget = cfg.audioSource.transform.position;
+                    agent.SetDestination(investigateTarget);
+                    if (currentState != DollState.Investigate)
                     {
-                        investigateTarget = cfg.audioSource.transform.position;
-                        agent.SetDestination(investigateTarget);
-                        if (currentState != DollState.Investigate)
-                        {
-                            currentState = DollState.Investigate;
-                            Debug.Log($"Switched to Investigate state. New investigate target: {investigateTarget}");
-                        }
-                        else
-                        {
-                            Debug.Log($"Updated investigate target to: {investigateTarget}");
-                        }
+                        currentState = DollState.Investigate;
+                        Debug.Log($"[Hearing] Loud sound detected from {other.name} at volume {vol:F2}. Switching to Investigate state.");
                     }
                 }
             }
         }
     }
-
     #endregion
 
-    #region Line of Sight (SphereCast)
-
+    #region Visibility - SphereCast
     private bool IsPlayerVisibleSphere()
     {
-        if (playerTransform == null)
+        if (!playerTransform)
             return false;
 
-        Vector3 dollEyes = transform.position + Vector3.up * 0.25f;
-        Vector3 playerCenter = playerTransform.position + Vector3.up * 0.35f;
-        Vector3 direction = playerCenter - dollEyes;
-        float distance = direction.magnitude;
-        float sphereRadius = visibilitySphereRadius;
+        Vector3 eyesPos = transform.position + Vector3.up * 0.25f;
+        Vector3 playerPos = playerTransform.position + Vector3.up * 0.35f;
+        Vector3 dir = playerPos - eyesPos;
+        float distance = dir.magnitude;
 
-        Debug.Log($"SphereCast from {dollEyes} to {playerCenter} (dist: {distance}, radius: {sphereRadius})");
-        if (Physics.SphereCast(dollEyes, sphereRadius, direction.normalized, out RaycastHit hit, distance))
+        if (Physics.SphereCast(eyesPos, visibilitySphereRadius, dir.normalized, out RaycastHit hit, distance))
         {
-            Debug.Log($"SphereCast hit {hit.transform.name}");
-            if (hit.transform == playerTransform)
-            {
-                Debug.Log("Player is visible!");
-                return true;
-            }
-            else
-            {
-                Debug.Log($"View obstructed by {hit.transform.name}");
-            }
+            bool isVisible = hit.transform == playerTransform;
+            Debug.Log($"[Visibility] SphereCast hit {hit.transform.name}. Player visible: {isVisible}");
+            return isVisible;
+        }
+        Debug.Log("[Visibility] SphereCast hit nothing. Player not visible.");
+        return false;
+    }
+    #endregion
+
+    #region Animations
+    private void UpdateAnimations()
+    {
+        if (!dollAnimator)
+            return;
+
+        float speed = agent.velocity.magnitude;
+        // Use "Walk" if moving, otherwise "Idle"
+        if (speed > 0.1f)
+        {
+            dollAnimator.SetTrigger("Walk");
         }
         else
         {
-            Debug.Log("SphereCast hit nothing.");
+            dollAnimator.SetTrigger("Idle");
         }
-        return false;
     }
-
     #endregion
 }
