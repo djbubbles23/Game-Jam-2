@@ -17,7 +17,7 @@ public class CabinetHideZone : MonoBehaviour
     // Track whether the player is currently hidden.
     private bool isHidden = false;
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
@@ -31,14 +31,14 @@ public class CabinetHideZone : MonoBehaviour
         }
     }
 
-    void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             playerInZone = false;
             playerTransform = null;
             HUDManager.Instance.HideActionPrompt();
-            // Optional: if the player exits while hidden, automatically unhide them.
+            // Optional: If the player exits while hidden, automatically exit hiding.
             if (isHidden)
             {
                 if (exitPosition != null)
@@ -47,11 +47,13 @@ public class CabinetHideZone : MonoBehaviour
                 }
                 isHidden = false;
                 HUDManager.Instance.HideHideOverlay();
+                // Play close sound
+                HideZoneManager.Instance.PlayCloseSound();
             }
         }
     }
 
-    void Update()
+    private void Update()
     {
         if (playerInZone && Input.GetKeyDown(hideKey))
         {
@@ -65,8 +67,9 @@ public class CabinetHideZone : MonoBehaviour
                 isHidden = true;
                 Debug.Log("Player is now hidden.");
                 HUDManager.Instance.ShowActionPrompt("Press H to exit");
-                // Show a full-screen black overlay to hide the camera view.
                 HUDManager.Instance.ShowHideOverlay();
+                // Play open sound
+                HideZoneManager.Instance.PlayOpenSound();
             }
             else
             {
@@ -78,8 +81,9 @@ public class CabinetHideZone : MonoBehaviour
                 isHidden = false;
                 Debug.Log("Player is no longer hidden.");
                 HUDManager.Instance.ShowActionPrompt("Press H to hide");
-                // Remove the overlay.
                 HUDManager.Instance.HideHideOverlay();
+                // Play close sound
+                HideZoneManager.Instance.PlayCloseSound();
             }
         }
     }
