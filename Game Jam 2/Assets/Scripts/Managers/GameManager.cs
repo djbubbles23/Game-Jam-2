@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.UI;
 
 public enum EndScreen { None, GameOver, Win }
+public enum Difficulty { Easy = 6, Normal = 9, Hard = 12 }
 
 public class GameManager : MonoBehaviour
 {
@@ -17,17 +18,30 @@ public class GameManager : MonoBehaviour
     public Canvas pauseMenuCanvas;
     public Canvas gameOverCanvas;
     public Canvas winCanvas;
-    public Canvas hudCanvas;  // For timer and in-game HUD
+    public Canvas hudCanvas;
 
     [Header("UI Elements")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI gameOverText;
     public TextMeshProUGUI winText;
-    public Image lossTintOverlay; // Full-screen red tint for loss
-    public Image winTintOverlay;  // Full-screen white tint for win
+    public Image lossTintOverlay;
+    public Image winTintOverlay;
+
+    [Header("Hiding Overlay")]
+    public Image hidingOverlay;
 
     [Header("Audio")]
-    public AudioSource lossSoundEffect; // Placeholder loss sound
+    public AudioSource lossSoundEffect;
+
+    [Header("Difficulty Settings")]
+    public Difficulty currentDifficulty = Difficulty.Normal;
+    [Tooltip("Reference to the Doll's SphereCollider used for hearing detection.")]
+    public SphereCollider dollSphereCollider;
+
+    [Header("Difficulty Buttons")]
+    public Button difficultyEasyButton;
+    public Button difficultyNormalButton;
+    public Button difficultyHardButton;
 
     private bool isPaused = false;
 
@@ -39,23 +53,20 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-        // Optionally persist: DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
     {
         startTime = Time.time;
-        // At game start, only show the HUD.
-        SetUIState(hud: true, pause: false, gameOver: false, win: false);
+        SetUIState(true, false, false, false);
+        SetDifficulty(currentDifficulty);
     }
 
     private void Update()
     {
-        // Allow pausing regardless of game over.
         if (Input.GetKeyDown(KeyCode.Escape))
             TogglePause();
 
-        // Update timer if game is active.
         if (!isPaused && timerText != null)
         {
             float currentTime = Time.time - startTime;
@@ -67,45 +78,39 @@ public class GameManager : MonoBehaviour
     {
         isPaused = !isPaused;
         Time.timeScale = isPaused ? 0f : 1f;
-
         if (isPaused)
         {
-            // When pausing, hide HUD and any end screens, show pause menu.
-            SetUIState(hud: false, pause: true, gameOver: false, win: false);
+            SetUIState(false, true, false, false);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        else // Unpausing.
+        else
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            // If game is over, re-enable the appropriate end screen; otherwise, show HUD.
             if (isGameOver)
             {
                 if (currentEndScreen == EndScreen.GameOver)
-                    SetUIState(hud: false, pause: false, gameOver: true, win: false);
+                    SetUIState(false, false, true, false);
                 else if (currentEndScreen == EndScreen.Win)
-                    SetUIState(hud: false, pause: false, gameOver: false, win: true);
+                    SetUIState(false, false, false, true);
             }
             else
             {
-                SetUIState(hud: true, pause: false, gameOver: false, win: false);
+                SetUIState(true, false, false, false);
             }
         }
 
-        // Disable/Enable player movement. (Assumes FirstPersonController handles camera movement.)
         FirstPersonController fpc = FindFirstObjectByType<FirstPersonController>();
         if (fpc != null)
-            fpc.enabled = !isPaused;
+        {
+            if (!isGameOver)
+                fpc.enabled = !isPaused;
+            else
+                fpc.enabled = false;
+        }
     }
 
-    /// <summary>
-    /// Sets which UI canvases should be active.
-    /// </summary>
-    /// <param name="hud">Show the in-game HUD?</param>
-    /// <param name="pause">Show the pause menu?</param>
-    /// <param name="gameOver">Show the game over screen?</param>
-    /// <param name="win">Show the win screen?</param>
     private void SetUIState(bool hud, bool pause, bool gameOver, bool win)
     {
         if (hudCanvas) hudCanvas.enabled = hud;
@@ -114,6 +119,8 @@ public class GameManager : MonoBehaviour
         if (winCanvas) winCanvas.enabled = win;
         if (lossTintOverlay) lossTintOverlay.gameObject.SetActive(gameOver);
         if (winTintOverlay) winTintOverlay.gameObject.SetActive(win);
+        if (hidingOverlay != null)
+            hidingOverlay.gameObject.SetActive(hidingOverlay.gameObject.activeSelf);
     }
 
     public void RestartGame()
@@ -133,16 +140,12 @@ public class GameManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
         Time.timeScale = 0f;
-
-        SetUIState(hud: false, pause: false, gameOver: true, win: false);
+        SetUIState(false, false, true, false);
         if (gameOverText != null)
             gameOverText.text = "You Lost!";
         if (lossSoundEffect != null)
             lossSoundEffect.Play();
-
         currentEndScreen = EndScreen.GameOver;
-
-        // Trigger screen shake if available.
         CameraShake cs = FindFirstObjectByType<CameraShake>();
         if (cs != null)
             cs.Shake();
@@ -153,14 +156,50 @@ public class GameManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
         Time.timeScale = 0f;
-
-        SetUIState(hud: false, pause: false, gameOver: false, win: true);
+        SetUIState(false, false, false, true);
         if (winText != null)
         {
             float finalTime = Time.time - startTime;
             winText.text = "You Escaped!\nTime: " + finalTime.ToString("F1") + "s";
         }
-
         currentEndScreen = EndScreen.Win;
+    }
+
+    public void SetDifficulty(Difficulty difficulty)
+    {
+        currentDifficulty = difficulty;
+        if (dollSphereCollider != null)
+            dollSphereCollider.radius = (int)currentDifficulty;
+
+        UpdateDifficultyButtonOutlines();
+    }
+
+    public void SetDifficultyEasy()
+    {
+        SetDifficulty(Difficulty.Easy);
+    }
+
+    public void SetDifficultyNormal()
+    {
+        SetDifficulty(Difficulty.Normal);
+    }
+
+    public void SetDifficultyHard()
+    {
+        SetDifficulty(Difficulty.Hard);
+    }
+
+    private void UpdateDifficultyButtonOutlines()
+    {
+        UpdateButtonOutline(difficultyEasyButton, currentDifficulty == Difficulty.Easy);
+        UpdateButtonOutline(difficultyNormalButton, currentDifficulty == Difficulty.Normal);
+        UpdateButtonOutline(difficultyHardButton, currentDifficulty == Difficulty.Hard);
+    }
+
+    private void UpdateButtonOutline(Button button, bool isSelected)
+    {
+        if (!button.TryGetComponent<Outline>(out var outline))
+            outline = button.gameObject.AddComponent<Outline>();
+        outline.enabled = isSelected;
     }
 }

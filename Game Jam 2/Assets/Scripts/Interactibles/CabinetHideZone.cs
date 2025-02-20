@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -25,9 +26,9 @@ public class CabinetHideZone : MonoBehaviour
             playerTransform = other.transform;
             // Show prompt based on current state.
             if (!isHidden)
-                HUDManager.Instance.ShowActionPrompt("Press H to hide");
+                HUDManager.Instance.ShowActionPrompt("Press H or Mouse Right Click to hide");
             else
-                HUDManager.Instance.ShowActionPrompt("Press H to exit");
+                HUDManager.Instance.ShowActionPrompt("Press H or Mouse Right Click to exit");
         }
     }
 
@@ -55,7 +56,8 @@ public class CabinetHideZone : MonoBehaviour
 
     private void Update()
     {
-        if (playerInZone && Input.GetKeyDown(hideKey))
+        if (playerInZone &&
+        (Input.GetKeyDown(hideKey) || Input.GetMouseButtonDown((int)MouseButton.Right)))
         {
             if (!isHidden)
             {
@@ -66,7 +68,7 @@ public class CabinetHideZone : MonoBehaviour
                 }
                 isHidden = true;
                 Debug.Log("Player is now hidden.");
-                HUDManager.Instance.ShowActionPrompt("Press H to exit");
+                HUDManager.Instance.ShowActionPrompt("Press H or Mouse Right Click to exit");
                 HUDManager.Instance.ShowHideOverlay();
                 // Play open sound
                 HideZoneManager.Instance.PlayOpenSound();
@@ -80,7 +82,7 @@ public class CabinetHideZone : MonoBehaviour
                 }
                 isHidden = false;
                 Debug.Log("Player is no longer hidden.");
-                HUDManager.Instance.ShowActionPrompt("Press H to hide");
+                HUDManager.Instance.ShowActionPrompt("Press H or Mouse Right Click to hide");
                 HUDManager.Instance.HideHideOverlay();
                 // Play close sound
                 HideZoneManager.Instance.PlayCloseSound();

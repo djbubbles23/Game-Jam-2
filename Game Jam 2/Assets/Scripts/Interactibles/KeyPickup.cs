@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -14,7 +15,7 @@ public class KeyPickup : MonoBehaviour
             playerInZone = true;
             playerTransform = other.transform;
             // Show a prompt using your HUDManager
-            HUDManager.Instance.ShowActionPrompt("Press K to pick up key");
+            HUDManager.Instance.ShowActionPrompt("Press K or Mouse Left Click to pick up key");
         }
     }
 
@@ -32,7 +33,8 @@ public class KeyPickup : MonoBehaviour
     private void Update()
     {
         // If the player is in the zone and presses K, pick up the key.
-        if (playerInZone && Input.GetKeyDown(KeyCode.K))
+        if (playerInZone &&
+            (Input.GetKeyDown(KeyCode.K) || Input.GetMouseButtonDown((int)MouseButton.Left)))
         {
             KeyManager km = FindFirstObjectByType<KeyManager>(); // Ensure your KeyManager is in the scene.
             if (km != null)

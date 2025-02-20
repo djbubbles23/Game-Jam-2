@@ -10,6 +10,8 @@ public class HUDManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI actionPrompt;
     [SerializeField] private Image hideOverlay; // Full-screen black Image
 
+    public bool isHidingActive { get; private set; }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -36,6 +38,7 @@ public class HUDManager : MonoBehaviour
         if (hideOverlay != null)
         {
             hideOverlay.gameObject.SetActive(true);
+            isHidingActive = true;
         }
     }
 
@@ -44,6 +47,7 @@ public class HUDManager : MonoBehaviour
         if (hideOverlay != null)
         {
             hideOverlay.gameObject.SetActive(false);
+            isHidingActive = false;
         }
     }
 }

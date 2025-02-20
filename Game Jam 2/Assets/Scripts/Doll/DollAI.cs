@@ -32,6 +32,7 @@ public class DollAI : MonoBehaviour
     [Header("Catch Settings")]
     [Tooltip("Distance at which the doll catches the player.")]
     public float catchDistance = 1f;
+    public bool canEndGame = true;
 
     [Header("Search Settings")]
     public float searchDuration = 5f;
@@ -217,7 +218,7 @@ public class DollAI : MonoBehaviour
         {
             agent.isStopped = true;
             Debug.Log("[Chase] Player caught! Stopping agent.");
-            GameManager.Instance.GameOver();
+            if (canEndGame) { GameManager.Instance.GameOver(); }
         }
     }
     #endregion
